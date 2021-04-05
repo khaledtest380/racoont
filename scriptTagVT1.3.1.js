@@ -10,7 +10,7 @@ const readCookie = (name) => {
     return null;
 };
 const item_status = 1;
-const baseUrl = "https://racoonx.herokuapp.com";
+const baseUrl = "https://814ad3a1c1fa.ngrok.io";
 const productPageReg = new RegExp(/^\/products\/.*$/);
 const sessionId = readCookie("__ssid");
 let websiteId = location.host;
