@@ -92,7 +92,7 @@ router.post('/ingest', async(ctx)=>{
 
     try {
         const res = await axios.post('https://raccoonplatform.com:5000/ingest/event',{
-            "sessionId":sessionId.replaceAll('-',''),
+            "sessionId":sessionId,
             "clientApiKey":  clientApiKey || '',
             "category": "item",
             "action": action,
@@ -127,7 +127,7 @@ router.post('/ingest', async(ctx)=>{
     const clientApiKey = await result.apiKey
     try {
         const res = await axios.post('https://raccoonplatform.com:5000/recommend/ingest_session',{
-            "sessionId":sessionId.replaceAll('-',''),
+            "sessionId":sessionId,
             "clientApiKey":  clientApiKey || '',
         },{
             httpsAgent: new https.Agent({
@@ -196,7 +196,6 @@ router.post('/ingest', async(ctx)=>{
     const clientApiKey = await result.apiKey
     
     try {
-        //sessionId = sessionId.replaceAll('-','')
         const res = await axios.get(`https://raccoonplatform.com:5000/recommend/sbcf/${clientApiKey}/${sessionId}/4`,{
             httpsAgent: new https.Agent({
                 rejectUnauthorized: false

@@ -31,7 +31,8 @@ server.use(router.routes());
 server.use(router.allowedMethods());
 // Use module 'koa-bodyparser'
 var MongoClient = require('mongodb').MongoClient;
-const url = "mongodb+srv://racoon:k631575375T@racoonx.oviil.mongodb.net?retryWrites=true&w=majority";
+const gate = "k631575375T"
+const url = `mongodb+srv://racoon:${gate}@racoonx.oviil.mongodb.net?retryWrites=true&w=majority`;
 
 function storeData(shop,token){
     MongoClient.connect(url, function(err, db) {
@@ -83,7 +84,7 @@ server.use(
             const scriptTagBody =  JSON.stringify({
 	              script_tag: {
 	                  event: 'onload',
-	                  src: `https://cdn.jsdelivr.net/gh/khaledtest380/racoont@main/scriptTagVT1.3.3.js`
+	                  src: `https://cdn.jsdelivr.net/gh/khaledtest380/racoont@main/scriptTagVT1.3.4.js`
 	              },
 	          });
 

@@ -57,7 +57,7 @@ $(document).ready(() => {
 });
 
 // TODO: Make a call to an api on our server not hardcoded like this - refer to businessLogic.js
-const baseUrl = "https://fd33b8ec3ba7.ngrok.io";
+const baseUrl = "https://alsdkfjoi678.ngrok.com";
 const MIDDLEWARE_API_URL = baseUrl
 // apiKey = 'shopyfyApiKey', clientName = 'shopyfy'
 const authenticateRaccoon = () => {

@@ -10,9 +10,10 @@ const readCookie = (name) => {
     return null;
 };
 const item_status = 1;
-const baseUrl = "https://fd33b8ec3ba7.ngrok.io";
+const baseUrl = "https://alsdkfjoi678.ngrok.com";
 const productPageReg = new RegExp(/^\/products\/.*$/);
 const sessionId = readCookie("__ssid");
+const sessionIdX = sessionId.replaceAll("-", "");
 let websiteId = location.host;
 if (location.host.indexOf("www.") === 0) {
     websiteId = location.host.replace("www.", "");
@@ -232,10 +233,8 @@ if (pathname === "/") {
         .then((data) => {
             fillPopularItemsAtc(data);
         });
-    const sessionIdx = sessionId.replaceAll("-", "");
-    console.log(sessionIdx);
     fetch(
-        `${baseUrl}/sessionRecommendation/${websiteId}/${sessionIdx}`
+        `${baseUrl}/sessionRecommendation/${websiteId}/${sessionIdX}`
     )
         .then((response) => response.json())
         .then((data) => {
@@ -251,7 +250,7 @@ if (productPageReg.test(pathname)) {
             "Content-Type": "application/json",
         },
         body: JSON.stringify({
-            sessionId,
+            sessionIdX,
             websiteId,
         }),
     };
@@ -298,7 +297,7 @@ if (productPageReg.test(pathname)) {
                     },
                     body: JSON.stringify({
                         websiteId,
-                        sessionId,
+                        sessionIdX,
                         name: productData.title,
                         price: productPrice || 0,
                         action: requestAction,
