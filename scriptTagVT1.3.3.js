@@ -10,7 +10,7 @@ const readCookie = (name) => {
     return null;
 };
 const item_status = 1;
-const baseUrl = "https://f73de44a5cc9.ngrok.io";
+const baseUrl = "https://fd33b8ec3ba7.ngrok.io";
 const productPageReg = new RegExp(/^\/products\/.*$/);
 const sessionId = readCookie("__ssid");
 let websiteId = location.host;
