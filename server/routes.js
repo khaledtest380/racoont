@@ -43,7 +43,7 @@ async function saveApiKey(apiKey,clientName,shop) {
     const query = {storeId:shop}
     const newData = {$set:{apiKey: apiKey,clientName:clientName}};
     const result = await stores.updateOne(query,newData);
-    console.log(result)
+    //console.log(result)
   }
 
 
@@ -215,10 +215,10 @@ router.post('/ingest', async(ctx)=>{
 
   router.get("/productById/:shop/:id", async (ctx) => {
     const { shop, id } = ctx.params;
-    console.log(shop, id);
+    //console.log(shop, id);
     const result = await getdata(shop)
     const token = await result.token
-    console.log(token);
+    //console.log(token);
     let url = `https://${shop}/admin/api/2021-01/products/${id}.json`;
     headers = await {
       headers: {
