@@ -47,16 +47,17 @@ function storeData(shop,token){
                 dbo.collection("stores").insertOne(myobj, function(err, res) {
                     if (err) throw err;
                     console.log("1 document inserted");
+                    console.log(result);
                     db.close();
                   });
             }else{
                 dbo.collection("stores").updateOne(query, newvalues, function(err, res) {
                     if (err) throw err;
                     console.log("1 document updated");
+                    console.log(result);
                     db.close();
                   });
             }
-            console.log(result);
             db.close();
           });
       });

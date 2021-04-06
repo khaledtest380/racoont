@@ -16,27 +16,37 @@ const prepareAuth = (ctx) => {
     }
 };
 
-
 var MongoClient = require('mongodb').MongoClient;
-const url = "mongodb+srv://racoon:k631575375T@racoonx.oviil.mongodb.net?retryWrites=true&w=majority";
+const uri = "mongodb+srv://racoon:k631575375T@racoonx.oviil.mongodb.net?retryWrites=true&w=majority";
 
-function getData(shop) {
-    const token = ''
-    MongoClient.connect(url, function(err, db) {
-        if (err) throw err;
-        var dbo = db.db("racoon");
-        var query = { storeId: shop};
-        dbo.collection("stores").find(query).toArray(function(err, result) {
-          if (err) throw err;
-            if(result[0].token!=null){
-                console.log(result[0].token);
-                token = result[0].token;
-            }
-          db.close();
-        });
-      });
-      return token
+async function getdata(shop) {
+  const client = new MongoClient(uri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  await client.connect();
+  const database = client.db("racoon");
+  const stores = database.collection("stores");
+  const query = { storeId: shop };
+  const result = await stores.findOne(query);
+  return result
 }
+
+async function saveApiKey(apiKey,clientName,shop) {
+    const client = new MongoClient(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    await client.connect();
+    const database = client.db("racoon");
+    const stores = database.collection("stores");
+    const query = {storeId:shop}
+    const newData = {$set:{apiKey: apiKey,clientName:clientName}};
+    const result = await stores.updateOne(query,newData);
+    console.log(result)
+  }
+
+
 
 // get required data from shopify
 router.get('/data/', async (ctx) => {
@@ -50,6 +60,7 @@ router.post('/authenticate', async(ctx)=>{
     console.log('Shopify credentials')
     const {apiKey,clientName} = ctx.request.body
     const {shop} = prepareAuth(ctx);
+    const data = await saveApiKey(apiKey,clientName,shop)
 
     try {
         const res = await axios.get(`https://raccoonplatform.com:5000/admin/clients/reset/${apiKey}/${clientName}`,{
@@ -75,11 +86,14 @@ router.post('/ingest', async(ctx)=>{
     const {sessionId,price,name,action,websiteId,id} = ctx.request.body
     console.log(id);
     ctx.response.status = 200;
+    const data = await getdata(websiteId)
+    const clientApiKey = await data.apiKey
+
 
     try {
         const res = await axios.post('https://raccoonplatform.com:5000/ingest/event',{
             "sessionId":sessionId.replaceAll('-',''),
-            "clientApiKey":  apiKeysStorage[websiteId] || '',
+            "clientApiKey":  clientApiKey || '',
             "category": "item",
             "action": action,
             "interactive": "true", 
@@ -109,10 +123,12 @@ router.post('/ingest', async(ctx)=>{
     const data = ctx.request.body
     ctx.response.status = 200;
     const {sessionId,websiteId} = data
+    const result = await getdata(websiteId)
+    const clientApiKey = await result.apiKey
     try {
         const res = await axios.post('https://raccoonplatform.com:5000/recommend/ingest_session',{
             "sessionId":sessionId.replaceAll('-',''),
-            "clientApiKey":  apiKeysStorage[websiteId] || '',
+            "clientApiKey":  clientApiKey || '',
         },{
             httpsAgent: new https.Agent({
                 rejectUnauthorized: false
@@ -130,9 +146,11 @@ router.post('/ingest', async(ctx)=>{
   router.get('/relatedItems/:websiteId/:productId/', async(ctx)=>{
 
     const {productId,websiteId} = ctx.params
+    const result = await getdata(websiteId)
+    const clientApiKey = await result.apiKey
 
     try {
-        const res = await axios.get(`https://raccoonplatform.com:5000/recommend/sbcf/${apiKeysStorage[websiteId]}/${productId}/4`,{
+        const res = await axios.get(`https://raccoonplatform.com:5000/recommend/sbcf/${clientApiKey}/${productId}/4`,{
             httpsAgent: new https.Agent({
                 rejectUnauthorized: false
             })
@@ -151,9 +169,11 @@ router.post('/ingest', async(ctx)=>{
   router.get('/popularItems/:websiteId/:action/', async(ctx)=>{
 
     const {websiteId,action} = ctx.params
+    const result = await getdata(websiteId)
+    const clientApiKey = await result.apiKey
 
     try {
-        const res = await axios.get(`https://raccoonplatform.com:5000/recommend/popular_items/${apiKeysStorage[websiteId]}/${action}/4`,{
+        const res = await axios.get(`https://raccoonplatform.com:5000/recommend/popular_items/${clientApiKey}/${action}/4`,{
             httpsAgent: new https.Agent({
                 rejectUnauthorized: false
             })
@@ -172,10 +192,12 @@ router.post('/ingest', async(ctx)=>{
   router.get('/sessionRecommendation/:websiteId/:sessionId', async(ctx)=>{
 
     const {websiteId,sessionId} = ctx.params
+    const result = await getdata(websiteId)
+    const clientApiKey = await result.apiKey
     
     try {
         //sessionId = sessionId.replaceAll('-','')
-        const res = await axios.get(`https://raccoonplatform.com:5000/recommend/sbcf/${apiKeysStorage[websiteId]}/${sessionId}/4`,{
+        const res = await axios.get(`https://raccoonplatform.com:5000/recommend/sbcf/${clientApiKey}/${sessionId}/4`,{
             httpsAgent: new https.Agent({
                 rejectUnauthorized: false
             })
@@ -192,20 +214,24 @@ router.post('/ingest', async(ctx)=>{
   })
 
   router.get("/productById/:shop/:id", async (ctx) => {
-    localStorage = LocalStorage('./scratch')
-    const {id,shop} = ctx.params
-    const token = getData(shop);
-    url = `https://${shop}/admin/api/2021-01/products/${id}.json`
-    headers = {headers: {
-          "X-Shopify-Access-Token": token,
-          "Content-Type": "application/json",
-        }}
-    const res = await fetch(url,headers);
-    const json = await res.json()
-    console.log(token,shop);
+    const { shop, id } = ctx.params;
+    console.log(shop, id);
+    const result = await getdata(shop)
+    const token = await result.token
+    console.log(token);
+    let url = `https://${shop}/admin/api/2021-01/products/${id}.json`;
+    headers = await {
+      headers: {
+        "X-Shopify-Access-Token": token,
+        "Content-Type": "application/json",
+      },
+    };
+    const res = await fetch(url, headers);
+    const json = await res.json();
+    console.log(token, shop);
     ctx.response.body = json;
     ctx.response.status = 200;
-    return json
+    return json;
   });
 
 
