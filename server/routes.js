@@ -17,10 +17,11 @@ const prepareAuth = (ctx) => {
 };
 
 var MongoClient = require('mongodb').MongoClient;
-const uri = "mongodb+srv://racoon:k631575375T@racoonx.oviil.mongodb.net?retryWrites=true&w=majority";
+const gate = "xLarabpE5GXSaYL2"
+const url = `mongodb+srv://khaled:${gate}@racoon.moxvy.mongodb.net?retryWrites=true&w=majority`;
 
 async function getdata(shop) {
-  const client = new MongoClient(uri, {
+  const client = new MongoClient(url, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
@@ -33,7 +34,7 @@ async function getdata(shop) {
 }
 
 async function saveApiKey(apiKey,clientName,shop) {
-    const client = new MongoClient(uri, {
+    const client = new MongoClient(url, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
@@ -43,7 +44,6 @@ async function saveApiKey(apiKey,clientName,shop) {
     const query = {storeId:shop}
     const newData = {$set:{apiKey: apiKey,clientName:clientName}};
     const result = await stores.updateOne(query,newData);
-    //console.log(result)
   }
 
 
@@ -83,16 +83,13 @@ router.post('/authenticate', async(ctx)=>{
 
 router.post('/ingest', async(ctx)=>{
     console.log('Shopify ingest event')
-    const {sessionId,price,name,action,websiteId,id} = ctx.request.body
-    console.log(id);
+    const {sessionIdX,price,name,action,websiteId,id} = ctx.request.body
     ctx.response.status = 200;
     const data = await getdata(websiteId)
     const clientApiKey = await data.apiKey
-
-
     try {
         const res = await axios.post('https://raccoonplatform.com:5000/ingest/event',{
-            "sessionId":sessionId,
+            "sessionId":sessionIdX,
             "clientApiKey":  clientApiKey || '',
             "category": "item",
             "action": action,
@@ -122,12 +119,12 @@ router.post('/ingest', async(ctx)=>{
     console.log('Shopify ingest_session')
     const data = ctx.request.body
     ctx.response.status = 200;
-    const {sessionId,websiteId} = data
+    const {sessionIdX,websiteId}=data
     const result = await getdata(websiteId)
     const clientApiKey = await result.apiKey
     try {
         const res = await axios.post('https://raccoonplatform.com:5000/recommend/ingest_session',{
-            "sessionId":sessionId,
+            "sessionId":sessionIdX,
             "clientApiKey":  clientApiKey || '',
         },{
             httpsAgent: new https.Agent({
@@ -138,7 +135,7 @@ router.post('/ingest', async(ctx)=>{
         
     } catch (error) {
         console.log('===========')
-        console.log(error)
+        console.log("error")
         console.log('===========')
     }
   })

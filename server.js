@@ -31,8 +31,9 @@ server.use(router.routes());
 server.use(router.allowedMethods());
 // Use module 'koa-bodyparser'
 var MongoClient = require('mongodb').MongoClient;
-const gate = "k631575375T"
-const url = `mongodb+srv://racoon:${gate}@racoonx.oviil.mongodb.net?retryWrites=true&w=majority`;
+
+const gate = "xLarabpE5GXSaYL2"
+const url = `mongodb+srv://khaled:${gate}@racoon.moxvy.mongodb.net?retryWrites=true&w=majority`;
 
 function storeData(shop,token){
     MongoClient.connect(url, function(err, db) {
