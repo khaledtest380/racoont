@@ -10,7 +10,7 @@ const readCookie = (name) => {
     return null;
 };
 const item_status = 1;
-const baseUrl = "https://alsdkfjoi678.ngrok.com";
+const baseUrl = "https://972712a9ab5b.ngrok.com";
 const productPageReg = new RegExp(/^\/products\/.*$/);
 const sessionId = readCookie("__ssid");
 const sessionIdX = sessionId.replaceAll("-", "");
